@@ -446,6 +446,16 @@ class SimObject: public ConsoleObject, public TamlCallbacks
    
       /// We can provide more detail, like object name and id.
       virtual String _getLogMessage(const char* fmt, va_list args) const;
+
+      //.logicking >>
+      bool mEnabled;   ///< Flag used to indicate whether object is enabled or not.
+      // set enable flag value
+      static bool setEnabledValue(void* obj, const char *index, const char* data)
+      {
+         static_cast<SimObject*>(obj)->setEnabled(dAtob(data));
+         return false;
+      };
+      //.logicking <<
    
       DEFINE_CREATE_METHOD
       {
@@ -970,6 +980,13 @@ class SimObject: public ConsoleObject, public TamlCallbacks
 
       // EngineObject.
       virtual void destroySelf();
+
+      //.logicking >>
+      //this function call chunks stored in dynamic fields
+      void signal(const char* fieldName, const char* args = NULL);
+      virtual void setEnabled(const bool enabled) { mEnabled = enabled; }
+      bool isEnabled() const { return mEnabled; }
+      //.logicking <<
 };
 
 

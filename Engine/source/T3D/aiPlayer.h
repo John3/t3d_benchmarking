@@ -67,8 +67,7 @@ private:
    // move triggers
    bool mMoveTriggers[MaxTriggerKeys];
 
-   // Utility Methods
-   void throwCallback( const char *name );
+
 
 #ifdef TORQUE_NAVIGATION_ENABLED
    /// Should we jump?
@@ -142,6 +141,8 @@ private:
 protected:
    virtual void onReachDestination();
    virtual void onStuck();
+   // Utility Methods
+   void throwCallback(const char *name);
 
 public:
    DECLARE_CONOBJECT( AIPlayer );

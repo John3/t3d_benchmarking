@@ -148,6 +148,9 @@ enum SceneObjectTypes
    PhysicalZoneObjectType = BIT( 22 ),
 
    EntityObjectType = BIT(23),
+
+   //.logicking
+   AIObjectType = BIT(24),
    /// @}
 };
 

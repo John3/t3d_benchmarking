@@ -34,7 +34,8 @@
 #endif
 
 class Convex;
-
+//.logicking
+class PhysicsBody;
 
 class PhysicalZone : public SceneObject
 {
@@ -57,7 +58,10 @@ class PhysicalZone : public SceneObject
    EarlyOutPolyList     mClippedList;
 
    bool mActive;
-
+   //.logicking >>
+   bool mInvisibleWall;
+   PhysicsBody *mPhysicsRep;
+   //.logicking <<
    Convex* mConvexList;
    void buildConvex(const Box3F& box, Convex* convex);
 
@@ -95,6 +99,11 @@ class PhysicalZone : public SceneObject
    void activate();
    void deactivate();
    inline bool isActive() const { return mActive; }
+   //.logicking >> Physical zone can just work as invisible wall 
+   // for some kind of objects
+   bool isInvisibleWall(SceneObject* who);
+   PhysicsBody* getPhysicsRep();
+   //.logicking <<
 
 };
 

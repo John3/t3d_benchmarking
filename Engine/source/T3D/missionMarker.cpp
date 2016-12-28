@@ -98,7 +98,8 @@ bool MissionMarker::onAdd()
       addToScene();
       mAddedToScene = true;
    }
-
+   //.logicking
+   scriptOnAdd();
    return(true);
 }
 
@@ -110,6 +111,8 @@ void MissionMarker::onRemove()
       mAddedToScene = false;
    }
 
+   //.logicking
+   scriptOnRemove();
    Parent::onRemove();
 }
 

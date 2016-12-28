@@ -35,6 +35,12 @@
 #include "math/mathIO.h"
 #include "sim/netConnection.h"
 #include "scene/sceneObjectLightingPlugin.h"
+//.logicking >>
+#include "collision/concretePolyList.h"
+#include "T3D/physics/physicsPlugin.h"
+#include "T3D/physics/physicsBody.h"
+#include "T3D/physics/physicsCollision.h"
+//.logicking <<
 
 extern void wireCube(F32 size,Point3F pos);
 
@@ -174,6 +180,8 @@ StaticShape::StaticShape()
 {
    mTypeMask |= StaticShapeObjectType | StaticObjectType;
    mDataBlock = 0;
+   //.logicking
+   mPhysicsRep = NULL;
 }
 
 StaticShape::~StaticShape()
@@ -198,10 +206,44 @@ bool StaticShape::onAdd()
 
    addToScene();
 
+   //.logicking >>
+   updatePhysics();
+   //.logicking << 
+
    if (isServerObject())
       scriptOnAdd();
    return true;
 }
+
+//.logicking >>
+void StaticShape::updatePhysics()
+{
+   SAFE_DELETE(mPhysicsRep);
+   if (PHYSICSMGR)
+   {
+      mShapeInstance->animate();
+      // Get the interior collision geometry.
+      ConcretePolyList polylist;
+      if (buildPolyList(PLC_Collision, &polylist, getWorldBox(), getWorldSphere()))
+      {
+         polylist.triangulate();
+         PhysicsCollision *colShape = PHYSICSMGR->createCollision();
+         colShape->addTriangleMesh(polylist.mVertexList.address(),
+            polylist.mVertexList.size(),
+            polylist.mIndexList.address(),
+            polylist.mIndexList.size() / 3,
+            MatrixF::Identity);
+
+         PhysicsWorld *world = PHYSICSMGR->getWorld(isServerObject() ? "server" : "client");
+         mPhysicsRep = PHYSICSMGR->createBody();
+		   //.hack - set kinematic flag to prevent crash on deleting static shape in character sweep(deleting Doors)
+         mPhysicsRep->init(colShape, 0, PhysicsBody::BF_KINEMATIC, this, world);
+      }
+      if (isServerObject())
+         setMaskBits(PhysicsMask);
+   }
+ }
+//.logicking << 
 
 bool StaticShape::onNewDataBlock(GameBaseData* dptr, bool reload)
 {
@@ -215,6 +257,9 @@ bool StaticShape::onNewDataBlock(GameBaseData* dptr, bool reload)
 
 void StaticShape::onRemove()
 {
+   //.logicking >>
+   SAFE_DELETE(mPhysicsRep);
+   //.logicking <<
    scriptOnRemove();
    removeFromScene();
    Parent::onRemove();
@@ -270,6 +315,10 @@ U32 StaticShape::packUpdate(NetConnection *connection, U32 mask, BitStream *bstr
       retMask |= mLightPlugin->packUpdate(this, ExtendedInfoMask, connection, mask, bstream);
    }
 
+   //.logicking >>
+   bstream->writeFlag(mask & PhysicsMask);
+   //.logicking <<
+
    return retMask;
 }
 
@@ -295,6 +344,11 @@ void StaticShape::unpackUpdate(NetConnection *connection, BitStream *bstream)
    {
       mLightPlugin->unpackUpdate(this, connection, bstream);
    }
+
+   //.logicking >>
+   if (bstream->readFlag())
+      updatePhysics();
+   //.logicking <<
 }
 
 
@@ -316,3 +370,10 @@ DefineConsoleMethod(StaticShape, getPoweredState, bool, (), , "@internal")
       return(false);
    return(object->isPowered());
 }
+
+//.logicking >>
+ConsoleMethod(StaticShape, updatePhysics, void, 2, 2, "")
+{
+   object->updatePhysics();
+}
+//.logicking

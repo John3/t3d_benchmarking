@@ -251,6 +251,14 @@ void AIPlayer::setMoveDestination( const Point3F &location, bool slowdown )
  */
 void AIPlayer::setAimObject( GameBase *targetObject )
 {
+   //.logicking >> hack to avoid stopping right after
+   // beginning of the move
+   MatrixF eye;
+   getEyeTransform(&eye);
+   Point3F pos = eye.getPosition();
+   mLastLocation = pos;
+   mLastLocation.z += mMoveTolerance * 2;
+   //.logicking <<
    mAimObject = targetObject;
    mTargetInLOS = false;
    mAimOffset = Point3F(0.0f, 0.0f, 0.0f);

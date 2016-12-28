@@ -1266,8 +1266,9 @@ void Projectile::interpolateTick(F32 delta)
 void Projectile::onCollision(const Point3F& hitPosition, const Point3F& hitNormal, SceneObject* hitObject)
 {
    // No client specific code should be placed or branched from this function
+   /*.logicking adding client physics
    if(isClientObject())
-      return;
+      return;*/
 
    if (hitObject != NULL && isServerObject())
    {

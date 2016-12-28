@@ -33,11 +33,6 @@
 #include "console/consoleTypes.h"
 #include "scene/sceneRenderState.h"
 #include "T3D/gameBase/gameProcess.h"
-#ifdef _WIN32
-#include "BulletMultiThreaded/Win32ThreadSupport.h"
-#elif defined (USE_PTHREADS)
-#include "BulletMultiThreaded/PosixThreadSupport.h"
-#endif
 
 BtWorld::BtWorld() :
    mProcessList( NULL ),
@@ -60,32 +55,8 @@ bool BtWorld::initWorld( bool isServer, ProcessList *processList )
    // Collision configuration contains default setup for memory, collision setup.
    mCollisionConfiguration = new btDefaultCollisionConfiguration();
 
-   // TODO: There is something wrong with multithreading
-   // and compound convex shapes... so disable it for now.
-   static const U32 smMaxThreads = 1;
-
-   // Different initialization with threading enabled.
-   if ( smMaxThreads > 1 )
-   {
-	   
-	   // TODO: ifdef assumes smMaxThread is always one at this point. MACOSX support to be decided
-#ifdef WIN32
-      mThreadSupportCollision = new Win32ThreadSupport( 
-         Win32ThreadSupport::Win32ThreadConstructionInfo(   isServer ? "bt_servercol" : "bt_clientcol",
-								                                    processCollisionTask,
-								                                    createCollisionLocalStoreMemory,
-								                                    smMaxThreads ) );
-      
-      mDispatcher = new	SpuGatheringCollisionDispatcher( mThreadSupportCollision,
-                                                         smMaxThreads,
-                                                         mCollisionConfiguration );
-#endif // WIN32
-   }
-   else
-   {
-      mThreadSupportCollision = NULL;
-      mDispatcher = new	btCollisionDispatcher( mCollisionConfiguration );
-   }
+   mThreadSupportCollision = NULL;
+   mDispatcher = new	btCollisionDispatcher( mCollisionConfiguration );
   
    btVector3 worldMin( -2000, -2000, -1000 );
    btVector3 worldMax( 2000, 2000, 1000 );
@@ -144,12 +115,12 @@ void BtWorld::tickPhysics( U32 elapsedMs )
       return;
 
    // Did we forget to call getPhysicsResults somewhere?
-   AssertFatal( !mIsSimulating, "PhysXWorld::tickPhysics() - Already simulating!" );
+   AssertFatal( !mIsSimulating, "BtWorld::tickPhysics() - Already simulating!" );
 
    // The elapsed time should be non-zero and 
    // a multiple of TickMs!
    AssertFatal(   elapsedMs != 0 &&
-                  ( elapsedMs % TickMs ) == 0 , "PhysXWorld::tickPhysics() - Got bad elapsed time!" );
+                  ( elapsedMs % TickMs ) == 0 , "BtWorld::tickPhysics() - Got bad elapsed time!" );
 
    PROFILE_SCOPE(BtWorld_TickPhysics);
 
@@ -157,7 +128,7 @@ void BtWorld::tickPhysics( U32 elapsedMs )
    const F32 elapsedSec = (F32)elapsedMs * 0.001f;
 
    // Simulate... it is recommended to always use Bullet's default fixed timestep/
-   mDynamicsWorld->stepSimulation( elapsedSec * mEditorTimeScale );
+   mDynamicsWorld->stepSimulation( elapsedSec * mEditorTimeScale,4 );
 
    mIsSimulating = true;
 
@@ -172,7 +143,6 @@ void BtWorld::getPhysicsResults()
    PROFILE_SCOPE(BtWorld_GetPhysicsResults);
 
    // Get results from scene.
-  // mScene->fetchResults( NX_RIGID_BODY_FINISHED, true );
    mIsSimulating = false;
    mTickCount++;
 }
@@ -190,9 +160,28 @@ void BtWorld::destroyWorld()
    _destroy();
 }
 
+//.logicking >>
+class btWorldClosestRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
+{
+   public:
+      btWorldClosestRayResultCallback(const btVector3&	convexFromWorld, const btVector3&	convexToWorld) :
+      ClosestRayResultCallback(convexFromWorld, convexToWorld) {};
+      virtual bool needsCollision(btBroadphaseProxy* proxy0) const
+      {
+         btCollisionObject* otherObj = (btCollisionObject*)proxy0->m_clientObject;
+         if (!otherObj->hasContactResponse())
+            return false;
+   
+         return ClosestRayResultCallback::needsCollision(proxy0);
+      }
+};
+//.logicking <<
+
 bool BtWorld::castRay( const Point3F &startPnt, const Point3F &endPnt, RayInfo *ri, const Point3F &impulse )
 {
-   btCollisionWorld::ClosestRayResultCallback result( btCast<btVector3>( startPnt ), btCast<btVector3>( endPnt ) );
+   //.logicking
+   //btCollisionWorld::ClosestRayResultCallback result( btCast<btVector3>( startPnt ), btCast<btVector3>( endPnt ) );
+   btWorldClosestRayResultCallback result(btCast<btVector3>(startPnt), btCast<btVector3>(endPnt));
    mDynamicsWorld->rayTest( btCast<btVector3>( startPnt ), btCast<btVector3>( endPnt ), result );
 
    if ( !result.hasHit() || !result.m_collisionObject )

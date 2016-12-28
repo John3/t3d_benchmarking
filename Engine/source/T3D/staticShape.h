@@ -27,6 +27,9 @@
 #include "T3D/shapeBase.h"
 #endif
 
+//.logicking - torque physics support
+class PhysicsBody;
+
 //----------------------------------------------------------------------------
 
 struct StaticShapeData: public ShapeBaseData {
@@ -58,10 +61,15 @@ class StaticShape: public ShapeBase
 
    void onUnmount(SceneObject* obj,S32 node);
 
+   //.logicking
+   PhysicsBody *mPhysicsRep;
+
 protected:
    enum MaskBits {
-      PositionMask = Parent::NextFreeMask,	  
-      NextFreeMask = Parent::NextFreeMask << 1
+      PositionMask = Parent::NextFreeMask,
+      //.logicking
+      PhysicsMask = Parent::NextFreeMask << 1,
+      NextFreeMask = Parent::NextFreeMask << 2
    };
 
 public:
@@ -84,7 +92,9 @@ public:
    void setPowered(bool power)      {mPowered = power;}
    bool isPowered()                 {return(mPowered);}
 
-   static void initPersistFields();   
+   static void initPersistFields();
+   //.logicking
+   void updatePhysics();
 };
 
 

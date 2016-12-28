@@ -4803,7 +4803,17 @@ Point3F Player::_move( const F32 travelTime, Collision *outCol )
             if (plistBox.isOverlapped(convexBox))
             {
                if (pConvex->getObject()->getTypeMask() & PhysicalZoneObjectType)
-                  pConvex->getPolyList(&sPhysZonePolyList);
+               {
+                  //.logicking >> behavior of Physical Zone as invisible wall                
+                  PhysicalZone* pZone = (PhysicalZone*)pConvex->getObject();
+                  if (pZone->isActive() && pZone->isInvisibleWall(this))
+                  {
+                     pConvex->getPolyList(&sExtrudedPolyList);
+                  }
+                  else
+                     pConvex->getPolyList(&sPhysZonePolyList);
+                  //.logicking <<                     
+               }
                else
                   pConvex->getPolyList(&sExtrudedPolyList);
             }
@@ -4878,6 +4888,26 @@ Point3F Player::_move( const F32 travelTime, Collision *outCol )
          // we can use it to do impacts
          // and query collision.
          *outCol = *collision;
+
+         //.logicking >>
+         // Calculating normal of collision, to help AI avoid obstacles.
+         wallAvoindance(collision->normal);
+         // apply impulse
+         if (isServerObject() /*|| Physics::getPhysics(false)!=NULL*/)
+         {
+            for (S32 i = 0; i<collisionList.getCount(); i++)
+            {
+               SceneObject* obj = collisionList[i].object;
+               if (obj && (obj->getTypeMask() & ShapeBaseObjectType))
+               {
+                  ShapeBase* shape = static_cast<ShapeBase*>(obj);
+                  static float impulseFactor = 0.12f;
+                  VectorF force = mMass*impulseFactor*-collisionList[i].normal;
+                  shape->applyImpulse(collisionList[i].point, force);
+               }               
+            }
+         }
+         //.logicking <<
 
          // Subtract out velocity
          VectorF dv = collision->normal * (bd + sNormalElasticity);

@@ -35,6 +35,10 @@
 #include "T3D/physics/physicsWorld.h"
 #include "core/util/tNamedFactory.h"
 
+//.logicking >>
+#include "T3D/gmk/physics/physics.h"
+//.logicking <<
+
 
 PhysicsPlugin* PhysicsPlugin::smSingleton = NULL;
 PhysicsResetSignal PhysicsPlugin::smPhysicsResetSignal;
@@ -133,6 +137,9 @@ DefineConsoleFunction( physicsPluginPresent, bool, (), , "physicsPluginPresent()
 
 DefineConsoleFunction( physicsInit, bool, (const char * library), ("default"), "physicsInit( [string library] )")
 {
+   //.logicking >>
+   Physics::init(library);
+   //.logicking <<
    return PhysicsPlugin::activate( library );
 }
 
@@ -144,7 +151,16 @@ DefineConsoleFunction( physicsDestroy, void, (), , "physicsDestroy()")
 
 DefineConsoleFunction( physicsInitWorld, bool, (const char * worldName), , "physicsInitWorld( String worldName )")
 {
-    bool res = PHYSICSMGR && PHYSICSMGR->createWorld( String( worldName ) );
+   bool res = PHYSICSMGR && PHYSICSMGR->createWorld( String( worldName ) );
+   //.logicking - timmy>>
+   bool server = false;
+   if (String(worldName).equal(PhysicsPlugin::smServerWorldName, String::NoCase))
+      server = true;
+    
+    if (res)
+      Physics::createPhysics(server, PHYSICSMGR->getWorld(String(worldName)));
+    //.logicking <<
+
    return res;
 }
 
@@ -152,6 +168,13 @@ DefineConsoleFunction( physicsDestroyWorld, void, (const char * worldName), , "p
 {
    if ( PHYSICSMGR )
       PHYSICSMGR->destroyWorld( worldName );
+
+   bool server = false;
+   if (String(worldName).equal(PhysicsPlugin::smServerWorldName, String::NoCase))
+      server = true;
+   //.logicking >>
+   Physics::destroyPhysics(server);
+   //.logicking <<
 }
 
 

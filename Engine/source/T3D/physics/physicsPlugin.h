@@ -72,9 +72,6 @@ protected:
    // Our map of Strings to PhysicsWorld pointers.
    Map<StringNoCase, PhysicsWorld*> mPhysicsWorldLookup;
 
-   static String smServerWorldName;
-   static String smClientWorldName;
-
    /// A SimSet of objects to delete before the
    /// physics reset/restore event occurs.
    SimObjectPtr<SimSet> mPhysicsCleanup;      
@@ -84,6 +81,8 @@ protected:
 
 public:
 
+   static String smServerWorldName;
+   static String smClientWorldName;
    /// Note this should go away when we have "real" singleplayer.
    static bool smSinglePlayer;
    static bool isSinglePlayer() { return smSinglePlayer; }

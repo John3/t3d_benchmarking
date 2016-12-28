@@ -37,6 +37,11 @@
 #include "T3D/gameBase/std/stdMoveList.h"
 #include "T3D/fx/cameraFXMgr.h"
 
+//.logicking >>
+#include "core/threadStatic.h"
+extern bool ATTS(gFreezeSim);
+//.logicking <<
+
 #ifdef TORQUE_EXPERIMENTAL_EC
 #include "T3D/components/coreInterfaces.h"
 #include "T3D/components/component.h"
@@ -258,8 +263,14 @@ void StdClientProcessList::onTickObject( ProcessObject *obj )
          con->mMoveList->clearMoves( 1 );
       }
    }
-   else if ( obj->isTicking() )
-      obj->processTick( 0 );
+   else if (obj->isTicking())
+      //.logicking >>
+      //Freezing simulation for all objects, that doesn't controlled
+      //by client. This will allow us to edit object and fly the camera simultaneously.
+      if (!ATTS(gFreezeSim))
+      //.logicking <<
+      obj->processTick(0);
+
 }
 
 void StdClientProcessList::advanceObjects()
@@ -402,6 +413,11 @@ void StdServerProcessList::onTickObject( ProcessObject *pobj )
       con->mMoveList->clearMoves( m );
    }
    else if ( pobj->isTicking() )
+      //.logicking >>
+      //Freezing simulation for all objects, that doesn't controlled
+      //by client. This will allow us to edit object and fly the camera simultaneously.
+      if (!ATTS(gFreezeSim))
+      //.logicking <<
       pobj->processTick( 0 );
 }
 
