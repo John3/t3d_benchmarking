@@ -84,13 +84,13 @@ void Physics::createPhysics(bool isServer, PhysicsWorld* world)
 
 	Physics* physics = NULL;
 	
-#ifdef PHYSICS_BULLET
+#ifdef TORQUE_PHYSICS_BULLET
 	if (mPhysLib == BULLET_LIB)
 		physics = PhysicsBullet::createPhysicsBullet(world);
 #endif
 
-#ifdef PHYSICS_PHYSX	
-	if (mPhysLib == PHYSX_LIB)
+#ifdef TORQUE_PHYSICS_PHYSX3	
+	if (mPhysLib == PHYSX3_LIB)
 		physics = PhysicsPhysX::createPhysicsX(world);
 #endif
 	
