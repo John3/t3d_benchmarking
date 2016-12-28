@@ -1,4 +1,6 @@
-# Torque 3D
+# Torque 3D - GMK Work in Progress
+
+This branch is highly likely to not be in working condition and or contains bugs, wouldn't recommend using this until it is finished.
 
 MIT Licensed Open Source version of [Torque 3D](http://torque3d.org) from [GarageGames](http://www.garagegames.com)
 
