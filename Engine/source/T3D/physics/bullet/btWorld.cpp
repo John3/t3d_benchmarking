@@ -41,8 +41,7 @@ BtWorld::BtWorld() :
    mTickCount( 0 ),
    mIsEnabled( false ),
    mEditorTimeScale( 1.0f ),
-   mDynamicsWorld( NULL ),
-   mThreadSupportCollision( NULL )
+   mDynamicsWorld( NULL )
 {
 } 
 
@@ -54,8 +53,6 @@ bool BtWorld::initWorld( bool isServer, ProcessList *processList )
 {
    // Collision configuration contains default setup for memory, collision setup.
    mCollisionConfiguration = new btDefaultCollisionConfiguration();
-
-   mThreadSupportCollision = NULL;
    mDispatcher = new	btCollisionDispatcher( mCollisionConfiguration );
   
    btVector3 worldMin( -2000, -2000, -1000 );
@@ -105,7 +102,6 @@ void BtWorld::_destroy()
    SAFE_DELETE( mSolver );
    SAFE_DELETE( mBroadphase );
    SAFE_DELETE( mDispatcher );
-   SAFE_DELETE( mThreadSupportCollision );
    SAFE_DELETE( mCollisionConfiguration );
 }
 

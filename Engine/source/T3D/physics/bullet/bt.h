@@ -39,5 +39,4 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
-
 #endif // _BULLET_H_
