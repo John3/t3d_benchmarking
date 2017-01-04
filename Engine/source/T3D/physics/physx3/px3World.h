@@ -23,14 +23,14 @@
 #ifndef _PX3WORLD_H_
 #define _PX3WORLD_H_
 
+#ifndef _PHYSX3_H_
+#include "T3D/physics/physx3/px3.h"
+#endif
 #ifndef _T3D_PHYSICS_PHYSICSWORLD_H_
 #include "T3D/physics/physicsWorld.h"
 #endif
 #ifndef _MMATH_H_
 #include "math/mMath.h"
-#endif
-#ifndef _PHYSX3_H_
-#include "T3D/physics/physx3/px3.h"
 #endif
 #ifndef _TVECTOR_H_
 #include "core/util/tVector.h"
@@ -62,13 +62,14 @@ protected:
 	F32 mEditorTimeScale;
 	bool mErrorReport;
 	physx::PxControllerManager* mControllerManager;
+   physx::PxRenderBuffer *mRenderBuffer;
 	static Px3ConsoleStream *smErrorCallback;
 	static physx::PxDefaultAllocator smMemoryAlloc;
 	static physx::PxFoundation* smFoundation;
 	static physx::PxCooking *smCooking;
-	static physx::PxProfileZoneManager* smProfileZoneManager;
 	static physx::PxDefaultCpuDispatcher* smCpuDispatcher;
-	static physx::PxVisualDebuggerConnection* smPvdConnection;
+	static physx::PxPvd* smPvdConnection;
+   static physx::PxPvdTransport* smPvdTransport;
    static F32 smPhysicsStepTime;
    static U32 smPhysicsMaxIterations;
 	F32 mAccumulator;
@@ -94,14 +95,12 @@ public:
 	void getPhysicsResults();
 	void setEditorTimeScale( F32 timeScale ) { mEditorTimeScale = timeScale; }
 	const F32 getEditorTimeScale() const { return mEditorTimeScale; }
-	void releaseWriteLock();
 	bool isServer(){return mIsServer;}
 	physx::PxController* createController( physx::PxControllerDesc &desc );
    void lockScene();
    void unlockScene();
 	//static
 	static bool restartSDK( bool destroyOnly = false, Px3World *clientWorld = NULL, Px3World *serverWorld = NULL );
-	static void releaseWriteLocks();
 	static physx::PxCooking *getCooking();
    static void setTiming(F32 stepTime,U32 maxIterations);
    static void lockScenes();
