@@ -108,6 +108,9 @@ function initClient()
 
    // Default player key bindings
    exec("./default.bind.cs");
+   
+   // GMK init
+   exec("./gmk/init.cs");
 
    if (isFile("./config.cs"))
       exec("./config.cs");
