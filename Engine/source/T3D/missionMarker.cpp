@@ -228,7 +228,7 @@ ConsoleDocClass( WayPoint,
 
 WayPoint::WayPoint()
 {
-   mName = StringTable->insert("");
+   mName = StringTable->EmptyString();
 }
 
 void WayPoint::setHidden(bool hidden)
@@ -259,7 +259,7 @@ void WayPoint::inspectPostApply()
 {
    Parent::inspectPostApply();
    if(!mName || !mName[0])
-      mName = StringTable->insert("");
+      mName = StringTable->EmptyString();
    setMaskBits(UpdateNameMask|UpdateTeamMask);
 }
 
@@ -284,7 +284,7 @@ void WayPoint::unpackUpdate(NetConnection * con, BitStream * stream)
 
 void WayPoint::initPersistFields()
 {
-   addGroup("Misc");	
+   addGroup("Misc"); 
    addField("markerName", TypeCaseString, Offset(mName, WayPoint), "Unique name representing this waypoint");
    endGroup("Misc");
    Parent::initPersistFields();
@@ -366,7 +366,7 @@ bool SpawnSphere::onAdd()
 
    if (!isGhost())
    {
-	   onAdd_callback( getId());
+      onAdd_callback( getId());
 
       if (mAutoSpawn)
          spawnObject();
@@ -530,7 +530,7 @@ ConsoleDocClass( CameraBookmark,
 
 CameraBookmark::CameraBookmark()
 {
-   mName = StringTable->insert("");
+   mName = StringTable->EmptyString();
 }
 
 bool CameraBookmark::onAdd()
@@ -574,7 +574,7 @@ void CameraBookmark::inspectPostApply()
 {
    Parent::inspectPostApply();
    if(!mName || !mName[0])
-      mName = StringTable->insert("");
+      mName = StringTable->EmptyString();
    setMaskBits(UpdateNameMask);
 
    if( isMethod("onInspectPostApply") )
@@ -598,7 +598,7 @@ void CameraBookmark::unpackUpdate(NetConnection * con, BitStream * stream)
 
 void CameraBookmark::initPersistFields()
 {
-   //addGroup("Misc");	
+   //addGroup("Misc");  
    //addField("name", TypeCaseString, Offset(mName, CameraBookmark));
    //endGroup("Misc");
 

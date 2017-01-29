@@ -124,7 +124,7 @@ void BtWorld::tickPhysics( U32 elapsedMs )
    const F32 elapsedSec = (F32)elapsedMs * 0.001f;
 
    // Simulate... it is recommended to always use Bullet's default fixed timestep/
-   mDynamicsWorld->stepSimulation( elapsedSec * mEditorTimeScale,4 );
+   mDynamicsWorld->stepSimulation( elapsedSec * mEditorTimeScale, smPhysicsMaxSubSteps, smPhysicsStepTime);
 
    mIsSimulating = true;
 
